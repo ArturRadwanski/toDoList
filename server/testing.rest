@@ -2,6 +2,15 @@ POST http://127.0.0.1:3000/user/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "nickname": "abc",
+    "nickname": "abc''==\\",
+    "password": "123"
+}
+
+### 
+POST http://127.0.0.1:3000/user/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "nickname": "abc2",
     "password": "123"
 }

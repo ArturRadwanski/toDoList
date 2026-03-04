@@ -28,7 +28,7 @@ app.use(express.json());
 app.use("/user", userRouter(database))
 
 
-app.use(errorHandler);
+//app.use(errorHandler);
 //svelte app
 app.use(handler)
 
