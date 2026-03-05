@@ -2,7 +2,7 @@ POST http://127.0.0.1:3000/user/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "nickname": "abc''==\\",
+    "nickname": "abcdd",
     "password": "123"
 }
 
@@ -11,6 +11,23 @@ POST http://127.0.0.1:3000/user/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "nickname": "abc2",
+    "nickname": "abcdd",
+    "password": "123"
+}
+
+###
+POST http://127.0.0.1:3000/user/refresh HTTP/1.1
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCkyskpXVCJ9.eyJpYXQiOkucNzI3MTA4NDUsImV4cCI6MTc3MjcxMDg0NX0.barv2zPitOQwdPf75JKBfF8YckcKm1CsH8KkBPtqha4M"
+}
+
+###
+DELETE http://127.0.0.1:3000/user/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "authToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzcyNzE2NDMyLCJleHAiOjE3NzI3MTgyMzJ9.GomvuhjILKux8abJ6mSSPJXwbz4e8HNHX7MsV9-B50w",
     "password": "123"
 }
