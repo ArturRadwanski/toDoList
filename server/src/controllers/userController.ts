@@ -7,7 +7,8 @@ import jwt from 'jsonwebtoken'
 /*
 req body: {
     nickname:string,
-    password: string
+    password: string,
+    email: string
 }
 
 possible responses:
@@ -18,29 +19,58 @@ possible responses:
 export async function addNewUser(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {    
     try {
     const salt = await bcrypt.genSalt(10);
-    const password = req.body.password;
-    const nickname = req.body.nickname;
+    const password:string = req.body.password;
+    const nickname:string = req.body.nickname;
+    const email_raw:string = req.body.email;
 
-    if (password === undefined || nickname === undefined){
+    if (password === undefined || nickname === undefined || email_raw === undefined){
         res.statusCode = 400;
         res.statusMessage = "Request body is incorrect";
         return res.send();
     }
+    const email = email_raw.toLowerCase();
+    const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm
+
+
+    if(!emailRegex.test(email)){
+        res.statusCode = 400;
+        res.statusMessage = "This is not a valid email"
+        return res.send();
+    }
+
     const hash:string = await bcrypt.hash(password + config.pepper, salt);
+
     
-    
-    const querry = database.prepare(`INSERT INTO users (nickname, hash)
-         VALUES(?, ?)`);
-    querry.run(nickname, hash);
+    const email_salt = config.emailSecretKey;
+    const emailVerfier:string = jwt.sign({nickname, email}, email_salt, {expiresIn: "5m"})
+
+    console.log(emailVerfier);
+
+    // ToDo, actual sending emails, do not waste free plan during development
+    const querry = database.prepare(`INSERT INTO users (nickname, hash, email, active)
+         VALUES(?, ?, ?, 0)`);
+    querry.run(nickname, hash, email);
+
     res.sendStatus(201);
     }
     catch(error:any) {
         if (error.code == 'ERR_SQLITE_ERROR' && error.errstr == 'constraint failed'){
-            res.statusMessage = "This nickname is already taken!"
-            res.statusCode = 409;
-            return res.send();
+            if(error.message == "UNIQUE constraint failed: users.email"){
+                res.statusMessage = "This email is already taken!"
+                res.statusCode = 409;
+                return res.send();
+            }
+
+            if(error.message == "UNIQUE constraint failed: users.nickname"){
+                res.statusMessage = "This nickname is already taken!"
+                res.statusCode = 409;
+                return res.send();
+            }
+            
         }
-        res.sendStatus(500);
+        console.log(error);
+        
+        return res.sendStatus(500);
         
     }
     
@@ -82,20 +112,20 @@ export async function logIn(req:Request, res:Response, next:NextFunction, databa
                 jwtSecretKey,
                 {expiresIn: "32m"});
             res.statusCode = 200;
-            res.send({authToken, refreshToken});
+            return res.send({authToken, refreshToken});
             
         }
         else {
             res.statusMessage = "Password is incorrect";
             res.statusCode = 409;
-            res.send();
+            return res.send();
         }
         
         
     }
     catch(error:any){
         console.log(error)
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 }
 
@@ -143,7 +173,7 @@ export function refresh(req:Request, res:Response, next:NextFunction, database:D
             res.statusMessage = "Token is invalid";
             return res.send();
         }
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
     
 }
@@ -153,6 +183,11 @@ req body:{
     authToken: string,
     password: string
 }
+
+possible responses:
+400 Request body is incorrect
+401 Token has expired | Password is incorrect
+200 body: {newAuthToken: string, newRefreshToken: string}
 */
 export async function deleteAccount(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
     const password:string = req.body.password;
@@ -194,23 +229,150 @@ export async function deleteAccount(req:Request, res:Response, next:NextFunction
             querryDeleteUser.run(id);
             res.statusCode = 200;
             res.statusMessage = "Succesfully deleted";
-            res.send();
+            return res.send();
         }
         else {
             res.statusCode = 401;
             res.statusMessage = "Password is incorrect";
-            res.send();
+            return res.send();
         }
 
     } 
     catch(error:any){
         if (error instanceof jwt.TokenExpiredError){
             res.statusCode = 401;
-            res.statusMessage = "Token expired";
+            res.statusMessage = "Token has expired";
             return res.send();
         }
         console.log(error);
-        res.send(500);
+        return res.send(500);
     }
 }
-//ToDo email and password reset
+
+/*req params: {
+    emailKey:string 
+}
+possible responses:
+400 Request parameters are incorrect | This token has expired | This token is not valid
+200
+
+
+*/
+export async function verifyEmail(req:Request, res:Response, next: NextFunction, database: DatabaseSync) {
+    const emailKey = req.params.emailKey;
+    if(emailKey === undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    try{
+    const payload = jwt.verify(emailKey[0] as string, config.emailSecretKey)
+    if (typeof payload == 'string'){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    const nickname = payload.nickname;
+    if(nickname === undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    
+    const querry = database.prepare("UPDATE users SET active = 1 WHERE nickname = ?")
+    querry.run(nickname);
+
+    res.statusCode = 200;
+    return res.send();
+}
+catch(error:any){
+    if(error.name == 'TokenExpiredError'){
+        res.statusCode = 400;
+        res.statusMessage = "This token has expired";
+        return res.send();
+    }
+    else if (error.name = 'JsonWebTokenError'){
+        res.statusCode = 400;
+        res.statusMessage = "This token is invalid";
+        return res.send();
+    }
+}
+}
+
+
+export async function askPasswordReset(req: Request, res: Response, next: NextFunction, database: DatabaseSync) {
+    const nickname = req.body.nickname;
+    if(nickname === undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect request body.";
+        return res.send();
+    }
+    const querry = database.prepare("SELECT email, active FROM users WHERE nickname = ?")
+    const result = querry.get(nickname);
+    if(result == undefined){
+        res.statusCode = 404;
+        res.statusMessage = "User with this nickname does not exist.";
+        return res.send();
+    }
+    const active = result.active!;
+    const email = result.email!;
+
+    if(active == 0){
+        res.statusCode = 400;
+        res.statusMessage = "You have not activated your email, so you cannot reset your password.";
+        return res.send();
+    }
+    const passwordCode = jwt.sign({nickname}, config.emailSecretKey, {expiresIn: "5m"});
+
+    console.log(passwordCode)
+    //ToDo actual email sending, do not waste recources while developing
+    res.statusCode = 200;
+    return res.send();
+}
+
+export async function passwordReset(req: Request, res: Response, next: NextFunction, database: DatabaseSync) {
+    const token = req.body.token;
+    const password = req.body.password;
+    if(token === undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    try{
+    const payload = jwt.verify(token[0] as string, config.emailSecretKey)
+    if (typeof payload == 'string'){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    const nickname = payload.nickname;
+   
+    if(nickname === undefined || password == undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect parameters in url"
+        return res.send();
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password + config.pepper, salt);
+
+    const querry = database.prepare("UPDATE users SET hash = ? WHERE nickname = ?")
+    querry.run(hash, nickname);
+
+    res.statusCode = 200;
+    return res.send();
+}
+catch(error:any){
+    if(error.name == 'TokenExpiredError'){
+        res.statusCode = 400;
+        res.statusMessage = "This token has expired";
+        return res.send();
+    }
+    else if (error.name = 'JsonWebTokenError'){
+        res.statusCode = 400;
+        res.statusMessage = "This token is invalid";
+        return res.send();
+    }
+    res.statusCode = 500;
+    return res.send();
+}
+}

@@ -3,6 +3,7 @@
   "compilerOptions": {
     // File Layout
     "rootDirs": ["./src", "../client/build"],
+    "rootDir": "..",
     "outDir": "./dist",
 
     // Environment Settings
@@ -38,7 +39,7 @@
 
     // Recommended Options
     "strict": true,
-    "jsx": "react-jsx",
+    // "jsx": "react-jsx",
     // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
