@@ -49,8 +49,9 @@ export async function addNewUser(req:Request, res:Response, next:NextFunction, d
     // ToDo, actual sending emails, do not waste free plan during development
     const querry = database.prepare(`INSERT INTO users (nickname, hash, email, active)
          VALUES(?, ?, ?, 0)`);
-    querry.run(nickname, hash, email);
-
+    const result = querry.run(nickname, hash, email);
+    
+    req.session.userId = String(result.lastInsertRowid);
     res.sendStatus(201);
     }
     catch(error:any) {
@@ -83,8 +84,7 @@ req body: {
     }
 
 possible responses :
-404 User with this nickname does not exists
-409 Password is incorrect
+409 "Password or nickname is incorrect"
 200 body: {authToken:string, refreshToken:string}
 */
 export async function logIn(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
@@ -92,31 +92,29 @@ export async function logIn(req:Request, res:Response, next:NextFunction, databa
         const nickname = req.body.nickname;
         const password = req.body.password;
 
+        if (nickname === undefined || password === undefined){
+            res.statusCode = 401;
+            res.statusMessage = "Incorrect request body";
+            return res.send();
+        }
+
         const querry = database.prepare("SELECT id, hash FROM users WHERE nickname = ?");
         const data = querry.all(nickname)[0];
-        if (data === undefined) {
-            res.statusMessage = "User with this nickname does not exists";
-            res.statusCode = 404;
+        if (data === undefined || data.hash === undefined || data.id === undefined) {
+            res.statusMessage = "Password or nickname is incorrect";
+            res.statusCode = 409;
             return res.send();
         }
 
         const isOk = await bcrypt.compare(password + config.pepper, data.hash as string);
         if(isOk){
-            const jwtSecretKey = config.jwtSecretKey;
-            const authToken = jwt.sign(
-                {id:data.id as string},
-                jwtSecretKey,
-                {expiresIn: "30m"});
-            const refreshToken = jwt.sign(
-                {id:data.id as string},
-                jwtSecretKey,
-                {expiresIn: "32m"});
+            req.session.userId = data.id as string;
             res.statusCode = 200;
-            return res.send({authToken, refreshToken});
+            return res.send();
             
         }
         else {
-            res.statusMessage = "Password is incorrect";
+            res.statusMessage = "Password or nickname is incorrect";
             res.statusCode = 409;
             return res.send();
         }
@@ -137,46 +135,46 @@ possible responses:
 401 Token has expired
 200 body: {newAuthToken: string, newRefreshToken: string}
 */
-export function refresh(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
-    const refreshToken:string = req.body.refreshToken;
-    if (refreshToken === undefined){
-        res.statusCode = 400;
-        res.statusMessage = "Request body is incorrect"
-        return res.send();
-    }
-    try {
-        const tokenBody = jwt.verify(refreshToken, config.jwtSecretKey);
+// export function refresh(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
+//     const refreshToken:string = req.body.refreshToken;
+//     if (refreshToken === undefined){
+//         res.statusCode = 400;
+//         res.statusMessage = "Request body is incorrect"
+//         return res.send();
+//     }
+//     try {
+//         const tokenBody = jwt.verify(refreshToken, config.jwtSecretKey);
 
-        if (typeof tokenBody === 'string'){
-            res.statusCode = 400;
-            res.statusMessage = "Request body is incorrect"
-            return res.send();
-        }
+//         if (typeof tokenBody === 'string'){
+//             res.statusCode = 400;
+//             res.statusMessage = "Request body is incorrect"
+//             return res.send();
+//         }
 
-        const payload = {
-            id: tokenBody.id as string
-        }
-        const newAuthToken = jwt.sign(payload, config.jwtSecretKey, {expiresIn: "30m"});
-        const newRefreshToken = jwt.sign(payload, config.jwtSecretKey, {expiresIn: "32m"});
+//         const payload = {
+//             id: tokenBody.id as string
+//         }
+//         const newAuthToken = jwt.sign(payload, config.jwtSecretKey, {expiresIn: "30m"});
+//         const newRefreshToken = jwt.sign(payload, config.jwtSecretKey, {expiresIn: "32m"});
 
-        res.statusCode = 200;
-        res.send({newAuthToken, newRefreshToken});
-    }
-    catch(error:any){
-        if (error instanceof jwt.TokenExpiredError){
-            res.statusCode = 401;
-            res.statusMessage = "Token has expired";
-            return res.send();
-        }
-        else if(error instanceof jwt.JsonWebTokenError) {
-            res.statusCode = 400;
-            res.statusMessage = "Token is invalid";
-            return res.send();
-        }
-        return res.sendStatus(500);
-    }
+//         res.statusCode = 200;
+//         res.send({newAuthToken, newRefreshToken});
+//     }
+//     catch(error:any){
+//         if (error instanceof jwt.TokenExpiredError){
+//             res.statusCode = 401;
+//             res.statusMessage = "Token has expired";
+//             return res.send();
+//         }
+//         else if(error instanceof jwt.JsonWebTokenError) {
+//             res.statusCode = 400;
+//             res.statusMessage = "Token is invalid";
+//             return res.send();
+//         }
+//         return res.sendStatus(500);
+//     }
     
-}
+// }
 
 /*
 req body:{
@@ -191,32 +189,22 @@ possible responses:
 */
 export async function deleteAccount(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
     const password:string = req.body.password;
-    const authToken:string = req.body.authToken;
-    
-    console.log(authToken)
-    if (password === undefined || authToken === undefined){
+    const id = req.session.userId;
+
+    if (password === undefined || id === undefined){
         res.statusCode = 400;
         res.statusMessage = "Request body is incorrect";
         return res.send();
     }
 
-    try{
 
-        const tokenBody = jwt.verify(authToken, config.jwtSecretKey)
-        if (typeof tokenBody === 'string'){
-            res.statusCode = 400;
-            res.statusMessage = "Request body is incorrect";
-            return res.send();
-        }
-
-        const id:number = parseInt(tokenBody.id);
-        console.log(tokenBody)
         const querry = database.prepare('SELECT hash FROM users WHERE id = ?')
-        const data = querry.all(id)[0];
+        const data = querry.get(id);
 
-        if (data === undefined){
+
+        if (data === undefined || data.hash === undefined){
             res.statusCode = 409;
-            res.statusMessage = "User with this id does not exists, relog than try aggain";
+            res.statusMessage = "User with this nickname does not exists, relog than try aggain";
             return res.send()
         }
 
@@ -229,24 +217,14 @@ export async function deleteAccount(req:Request, res:Response, next:NextFunction
             querryDeleteUser.run(id);
             res.statusCode = 200;
             res.statusMessage = "Succesfully deleted";
-            return res.send();
+            return req.session.destroy(() => res.send());
         }
         else {
             res.statusCode = 401;
             res.statusMessage = "Password is incorrect";
             return res.send();
         }
-
-    } 
-    catch(error:any){
-        if (error instanceof jwt.TokenExpiredError){
-            res.statusCode = 401;
-            res.statusMessage = "Token has expired";
-            return res.send();
-        }
-        console.log(error);
-        return res.send(500);
-    }
+  
 }
 
 /*req params: {

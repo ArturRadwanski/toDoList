@@ -1,40 +1,50 @@
 import express from 'express';
-import { errorHandler } from './middleware/errorHandler.js';
-//import { handler } from '../../client/build/handler.js';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import { handler } from '../../client/build/handler.js';
 import {DatabaseSync} from 'node:sqlite'
 import userRouter from "./routes/userRouter.js"
+import config from './config/config.js';
+import sqlite3Store from 'connect-sqlite3';
+import databaseInit from './databaseInit.js';
+import taskRouter from './routes/taskRouter.js';
+
 
 const database = new DatabaseSync('./database.db')
+databaseInit(database);
 
-database.exec(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nickname TEXT NOT NULL UNIQUE,
-        hash TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        active INTEGER NOT NULL
-        );`)
-database.exec(`CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    required_by TEXT NOT NULL,
-    ended TEXT,
-    priority INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-    );`)
 
 const app = express();
 app.use(express.json());
 
+
+
+
+const SQLiteStore = sqlite3Store(session);
+app.use(session({
+    store: new SQLiteStore({
+        db: 'database.db',    
+        dir: './',            
+        table: 'sessions'     
+    }) as unknown as any,
+    secret: config.jwtSecretKey,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+        secure: false,
+        maxAge: 1000 * 60 * 15, // session ends after 15 minutes of inactivity
+        httpOnly: true,
+    }
+}))
+app.use(cookieParser());
+
 // Routes
-app.use("/user", userRouter(database))
-
-
-//app.use(errorHandler);
-//svelte app
-const { handler } = await import('../../client/build/handler.js');
+app.use("/user", userRouter(database));
+app.use("/task", taskRouter(database));
 app.use(handler)
+
+
 
 
 export default app;

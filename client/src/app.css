@@ -1,0 +1,19 @@
+:root {
+  --color-primary: #007BFF;
+  --color-sidebar: #0B2545;
+  --color-bg: #F4F6F9;
+  --color-card: #FFFFFF;
+  --color-text-main: #1D2A44;
+  --color-text-muted: #7D8A99;
+  
+  --radius-main: 16px;
+  --radius-card: 12px;
+  --shadow-soft: 0 8px 24px rgba(11, 37, 69, 0.04);
+}
+
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
