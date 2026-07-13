@@ -2,6 +2,7 @@
     import login_background from "$lib/assets/login_background.jpg";
     import { goto } from "$app/navigation";
     import BackgroundImage from "../components/background_image.svelte";
+    import { PUBLIC_API_URL } from "$env/static/public";
 
     let err_message = $state("");
 
@@ -9,18 +10,18 @@
     let password = $state("");
     let is_empty = $derived(nickname.trim() == "" || password.trim() == "");
     async function onclick(e: MouseEvent){
-        const respone = await fetch("/user/login", {
+        const respone = await fetch(`${PUBLIC_API_URL}/user/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({nickname, password})
         })
         if(!respone.ok){
             err_message = respone.statusText;
         }
         else {
-            console.log(document.cookie);
             goto("/dashboard");
         }
     }

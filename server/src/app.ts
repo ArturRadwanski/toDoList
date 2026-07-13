@@ -8,6 +8,7 @@ import config from './config/config.js';
 import sqlite3Store from 'connect-sqlite3';
 import databaseInit from './databaseInit.js';
 import taskRouter from './routes/taskRouter.js';
+import cors from "cors";
 
 
 const database = new DatabaseSync('./database.db')
@@ -16,7 +17,13 @@ databaseInit(database);
 
 const app = express();
 app.use(express.json());
+const isProd = process.env.NODE_ENV === 'production';
 
+app.use(cors({
+    // Na produkcji pozwalamy na ten sam origin, na devie na port 5173
+    origin: isProd ? false : 'http://localhost:5173', 
+    credentials: true
+}));
 
 
 

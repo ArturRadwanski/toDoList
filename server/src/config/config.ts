@@ -7,6 +7,7 @@ interface Config {
   jwtSecretKey: string;
   pepper: string;
   emailSecretKey: string;
+  nodeEnviroment: string;
 }
 
 const config: Config = {
@@ -14,6 +15,7 @@ const config: Config = {
   jwtSecretKey: process.env.NODE_ENV || 'development',
   pepper: process.env.PEPPER || 'asdfk',
   emailSecretKey: process.env.EMAIL_SECRET || 'asfasf',
+  nodeEnviroment: process.env.NODE_ENV || "development"
 };
 
 export default config;

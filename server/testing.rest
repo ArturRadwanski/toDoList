@@ -2,7 +2,7 @@ POST http://127.0.0.1:3000/user/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "nickname": "abdddasfasfcdasdddd",
+    "nickname": "abc",
     "password": "123",
     "email": "basfaasdfsaakaa@ab.pl"
 }
@@ -12,7 +12,7 @@ POST http://127.0.0.1:3000/user/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "nickname": "abdddasfasfcdasdddd",
+    "nickname": "abc",
     "password": "123"
 }
 
@@ -41,5 +41,23 @@ POST http://127.0.0.1:3000/task/tag HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "work"
+    "name": "work2"
 }
+
+###
+POST http://127.0.0.1:3000/task/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "task2",
+    "priority": 0,
+    "tags": [1,2,3], 
+    "description": "desc",
+    "requiredBy": 123456
+}
+
+###
+GET http://127.0.0.1:3000/task/ HTTP/1.1
+
+###
+GET http://127.0.0.1:3000/task/tag HTTP/1.1
