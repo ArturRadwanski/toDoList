@@ -1,12 +1,14 @@
 <script lang="ts">
 import BackgroundImage from "../../components/background_image.svelte";
 import login_background from "$lib/assets/login_background.jpg"
-    import SideBar from "./side_bar.svelte";
-    import MainWindow from "./main_window.svelte";
+import SideBar from "./side_bar.svelte";
+import MainWindow from "./main_window.svelte";
+import type Tag from "$lib/types/tag";
+import type { PageData } from "./$types";
+import { initDashboardState } from "./shared_dashboard_state.svelte";
 
-let { data } = $props();
-let tasks = $state(data.tasks);
-let tags = $state(data.tags);
+let { data }: {data: PageData} = $props();
+initDashboardState(data.tasks, data.tags);
 
 </script>
 
@@ -24,8 +26,8 @@ let tags = $state(data.tags);
     
     .outer {
         display: flex;
-        width: 420px;
         border-radius: var(--radius-main);
+        width: 640px;
         padding: 32px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         flex-direction: column;
@@ -56,8 +58,8 @@ let tags = $state(data.tags);
 <div class="outer">
     <h1>TaskFlow</h1>
     <div class="inner">
-    <SideBar data />
-    <MainWindow data />
+    <SideBar {data} />
+    <MainWindow/>
     </div>
 </div>
 </div>

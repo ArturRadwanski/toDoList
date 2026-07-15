@@ -137,7 +137,7 @@ export async function getTasks(req:Request, res:Response, next:NextFunction, dat
             tags: element.task_tags ? (element.task_tags as string).split(',') : [],
         }
     })
-    return res.json(JSON.stringify(tasks));
+    return res.json(tasks);
 
 }
 
@@ -146,5 +146,5 @@ export async function getTags(req:Request, res:Response, next:NextFunction, data
     
     const querry = database.prepare("SELECT * FROM tags WHERE user_id = ?")
     const result = querry.all(user_id);
-    res.json(JSON.stringify(result));
+    res.json(result);
 }

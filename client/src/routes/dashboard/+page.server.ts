@@ -8,7 +8,7 @@ export const load:PageServerLoad = async ({fetch}) => {
     const taskResponse = await fetch(`${PUBLIC_API_URL}/task/`);
     const tagResponse = await fetch(`${PUBLIC_API_URL}/task/tag`);
     if(!tagResponse.ok || !taskResponse.ok){
-        redirect(300, "/");
+        redirect(307, "/");
     }
     const taskData:Task[] = await taskResponse.json();
     const tagData:Tag[] = await tagResponse.json();

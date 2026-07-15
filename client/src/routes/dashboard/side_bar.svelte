@@ -1,5 +1,10 @@
 <script lang="ts">
-    const {data} = $props();
+    import type Task from "$lib/types/task";
+    import type Tag from "$lib/types/tag";
+    const {data}: {data:{
+        tags:Tag[],
+        tasks:Task[]
+    }} = $props();
     const tags = $state(data.tags)
 </script>
 
