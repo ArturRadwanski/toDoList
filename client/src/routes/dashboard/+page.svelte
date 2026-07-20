@@ -8,7 +8,9 @@ import type { PageData } from "./$types";
 import { initDashboardState } from "./shared_dashboard_state.svelte";
 
 let { data }: {data: PageData} = $props();
-initDashboardState(data.tasks, data.tags);
+initDashboardState(data.tasks, data.tags.map((element) => {
+    return {...element, checked:true} //by default show all tags
+}));
 
 </script>
 
@@ -26,18 +28,14 @@ initDashboardState(data.tasks, data.tags);
     
     .outer {
         display: flex;
-        border-radius: var(--radius-main);
-        width: 640px;
-        padding: 32px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         flex-direction: column;
-        background-color: rgba(200,200,200,0.3);
         align-items: center;
         justify-content: center;
         filter: none;
     }
     .inner {
-        background-color: rgba(200,200,200,0.5);
+        background-color: rgba(220,220,220,0.9);
         border-radius: var(--radius-main);
         display: flex;
         align-items: center;
@@ -56,7 +54,6 @@ initDashboardState(data.tasks, data.tags);
 <BackgroundImage image_source = {login_background} />
 <div class="container" >
 <div class="outer">
-    <h1>TaskFlow</h1>
     <div class="inner">
     <SideBar {data} />
     <MainWindow/>

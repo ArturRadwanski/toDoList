@@ -10,8 +10,7 @@ export const load:PageServerLoad = async ({fetch}) => {
     if(!tagResponse.ok || !taskResponse.ok){
         redirect(307, "/");
     }
-    const taskData:Task[] = await taskResponse.json();
-    const tagData:Tag[] = await tagResponse.json();
+    const [taskData, tagData]:[Task[], Tag[]] =  await Promise.all([taskResponse.json(), tagResponse.json()]);
     
     return {
         tasks: taskData,

@@ -5,16 +5,23 @@ import { DatabaseSync} from 'node:sqlite';
 
 /*
 req.body : {
-    name:string
+    name:string,
+    color: {hue:number, saturation:number, lightness: number}
 }
 */
 export async function addTag(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
-    if(req.body.name === undefined){
+    if(req.body.name === undefined || req.body.color === undefined){
         res.statusCode=400;
         res.statusMessage="Incorrect request body";
         return res.send();
     }
     const name = String(req.body.name).trim();
+    const color: {hue:number, saturation:number, lightness: number} = req.body.color;
+    if(color.hue === undefined || color.saturation === undefined || color.lightness === undefined){
+        res.statusCode=400;
+        res.statusMessage="Incorrect request body";
+        return res.send();
+    }
     const user_id = req.session.userId!;
     const name_regex = /^[a-zA-Z0-9 ]*$/ //allow only letter,numbers and blank space
     if(!name_regex.test(name)){
@@ -23,8 +30,8 @@ export async function addTag(req:Request, res:Response, next:NextFunction, datab
         return res.send();
     }
     try{
-        const querry = database.prepare("INSERT INTO tags (user_id, name) VALUES (?, ?)");
-        querry.run(user_id, name);
+        const querry = database.prepare("INSERT INTO tags (user_id, name, hue, saturation, lightness) VALUES (?, ?, ?, ?, ?)");
+        querry.run(user_id, name, color.hue, color.saturation, color.lightness);
         return res.sendStatus(201);
     }
     catch(err:any){
@@ -118,7 +125,7 @@ export async function getTasks(req:Request, res:Response, next:NextFunction, dat
             t.ended,
             t.required_by,
             t.priority,
-            GROUP_CONCAT(tg.name) AS task_tags
+            GROUP_CONCAT(tg.id) AS task_tags
         FROM tasks AS t
         JOIN task_tags AS t_tg ON t.id = t_tg.task_id
         JOIN tags AS tg on t_tg.tag_id = tg.id
@@ -134,7 +141,7 @@ export async function getTasks(req:Request, res:Response, next:NextFunction, dat
             ended: element.ended,
             requiredBy: element.required_by,
             priority: element.priority,
-            tags: element.task_tags ? (element.task_tags as string).split(',') : [],
+            tags: element.task_tags ? (element.task_tags as string).split(',').map(Number) : [],
         }
     })
     return res.json(tasks);

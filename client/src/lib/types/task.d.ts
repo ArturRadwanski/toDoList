@@ -5,5 +5,5 @@ export default interface Task {
     requiredBy: number;
     ended: number | null;
     priority: number;
-    tags: string[]
+    tags: number[]
 }

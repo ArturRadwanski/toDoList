@@ -24,6 +24,9 @@ export default function databaseInit(database:DatabaseSync){
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         name TEXT NOT NULL,
+        hue INTEGER NOT NULL CHECK(hue >= 0) CHECK(hue <= 359),
+        saturation INTEGER NOT NULL CHECK(saturation >= 0) CHECK(saturation <= 100), 
+        lightness INTEGER NOT NULL CHECK(lightness >= 0) CHECK(lightness <= 100),
         UNIQUE(user_id, name),
         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         );`)

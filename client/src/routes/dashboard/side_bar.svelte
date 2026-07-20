@@ -22,5 +22,12 @@
         <p>Upcoming</p>
         <p>Important</p>
     </div>
+    <div id="account">
+    <!--TO DO style it correctly-->
+    <hr>
+        <p>nickname</p>
+        <button>settings</button>
+        <button>Log out</button>
+    </div>
 </div>
 
