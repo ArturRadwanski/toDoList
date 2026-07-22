@@ -9,10 +9,36 @@
     let tasks = dashboard.tasks;
     let tags = dashboard.tags;
     let selectedTags = $state(tags.map((element) => element.id));
+    let selectedPriorities = $state([0,1,2]);
+    let startDate = $state<string | null>(null);
+    let endDate = $state<string | null>(null);
+    let status = $state<boolean | null>(null); //true - show finished, false - show unfinished, null - show all
+    let sortBy = $state("requiredBy");
+
+    let sortedTasks = $derived([...tasks].sort((a,b) => {
+        if (sortBy === "requiredBy"){
+            return a.requiredBy - b.requiredBy;
+        }
+        else if (sortBy == "name"){
+            return a.name.localeCompare(b.name, "en", {sensitivity: 'base'});
+        }
+        else {
+            return a.priority - b.priority;
+        }
+    }))
     console.log(tasks);
 
     function onclick_debug(){
         $inspect(selectedTags)
+    }
+    function filter_all_dates(){
+        startDate = null;
+        endDate = null;
+    }
+    function filter_today(){
+        startDate = new Date().toISOString().slice(0,10);
+        endDate = new Date().toISOString().slice(0,10);
+        console.log(startDate)
     }
 </script>
 
@@ -55,23 +81,81 @@
 <div id="container" onclick={onclick_debug}>
 <h2>Your's Tasks</h2>
 <div id="select-container" >
-<CustomSelect >
+<CustomSelect title="Tags">
 {#each tags as tag}
     <label class="dropdown-item">
-      <input type="checkbox" bind:group={selectedTags} value={tag.id} checked/>
+      <input type="checkbox" bind:group={selectedTags} value={tag.id}/>
       <span>{tag.name}</span>
     </label>
   {/each}    
 </CustomSelect>
+<CustomSelect title="Priority">
+    <label class="dropdown-item">
+        <input type="checkbox" bind:group={selectedPriorities} value={0} />
+        <span>low</span>
+    </label>
+    <label class="dropdown-item">
+        <input type="checkbox" bind:group={selectedPriorities} value={1} />
+        <span>medium</span>
+    </label>
+    <label class="dropdown-item">
+        <input type="checkbox" bind:group={selectedPriorities} value={2} />
+        <span>high</span>
+    </label>
+</CustomSelect>
 
+<CustomSelect title="Date Range">
+<label class="dropdown-item">
+    <input type="date" bind:value={startDate}/>
+</label>
+<label class="dropdown-item">
+    <input type="date" bind:value={endDate}/>
+</label>
+<div class="dropdown-item">
+    <button onclick={filter_all_dates}>All</button>
+    <button onclick={filter_today}>Today</button>
+</div>
+</CustomSelect>
+<CustomSelect title="Status">
+    <label class="dropdown-item">
+        <input type="radio" bind:group={status} value = {null}/>
+        <span>All</span> 
+    </label>
+    <label class="dropdown-item">
+        <input type="radio" bind:group={status} value = {true}/>
+        <span>Completed</span> 
+    </label>
+    <label class="dropdown-item">
+        <input type="radio" bind:group={status} value = {false}/>
+        <span>Uncompleted</span> 
+    </label>
+</CustomSelect>
+<CustomSelect title="Sort by">
+    <label class="dropdown-item">
+        <input type="radio" bind:group={sortBy} value="requiredBy"/>
+        <span>Date</span>
+    </label>
+    <label class="dropdown-item">
+        <input type="radio" bind:group={sortBy} value="name"/>
+        <span>Name</span>
+    </label>
+    <label class="dropdown-item">
+        <input type="radio" bind:group={sortBy} value="priority"/>
+        <span>Priority</span>
+    </label>
+</CustomSelect>
 <!--ToDo rest of the selects-->
 
 </div>
 <input type="text" id="taks-search" placeholder="Search for task..." />
 <div id="task-container">
-    {#each tasks as task (task.id)}
-        {console.log(task.tags)}
-        {#if task.tags.some(element => selectedTags.includes(element))}
+    {#each sortedTasks as task (task.id)}
+        {@const included = task.tags.some(element => selectedTags.includes(element))
+        && selectedPriorities.includes(task.priority) 
+        && (startDate === null || task.requiredBy >= Date.parse(startDate))
+        && (endDate === null || task.requiredBy <= Date.parse(endDate))
+        && (status === null || status && task.ended != null || !status && task.ended === null)}
+        {#if included}
             <TaskCard name = {task.name} priority = {task.priority} tags = {task.tags}/>
         {/if}
     {/each}

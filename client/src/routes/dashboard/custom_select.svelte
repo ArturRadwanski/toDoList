@@ -1,5 +1,5 @@
 <script lang="ts">
-    let {children} = $props();
+    let {children, title} = $props();
     let isOpen = $state(false);
   
   function toggleDropdown() {
@@ -49,7 +49,7 @@
 
 <div class="dropdown">
   <button class="dropdown-button" onclick={toggleDropdown}>
-    Tags (2) <span class="arrow">▾</span>
+    {title} <span class="arrow">▾</span>
   </button>
 
     {#if isOpen}
