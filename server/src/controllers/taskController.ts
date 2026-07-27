@@ -64,6 +64,8 @@ req.body: {
     requiredBy: string, //unix timestamp
 
 }
+
+returns taskId
 */
 export async function addTask(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
     const user_id = req.session.userId!;
@@ -82,15 +84,17 @@ export async function addTask(req:Request, res:Response, next:NextFunction, data
     database.exec("BEGIN TRANSACTION");
     const querry = database.prepare("INSERT INTO tasks (name, description, required_by, priority, user_id) VALUES (?, ?, ?, ?, ?)");
     const result = querry.run(name, description, requiredBy, Math.floor(priority) % 3, user_id);
+    const taskId = result.lastInsertRowid;
+
 
     const relation_querry = database.prepare("INSERT INTO task_tags (task_id, tag_id) VALUES (?,?)")
     tags.forEach((tag_id) => {
-        relation_querry.run(result.lastInsertRowid, tag_id);
+        relation_querry.run(taskId, tag_id);
     })
     database.exec("COMMIT");
     res.statusCode = 201;
     res.statusMessage = "Succesfully created task";
-    return res.send();
+    return res.json({taskId});
 
     
     }
