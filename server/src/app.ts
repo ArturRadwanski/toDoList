@@ -9,6 +9,7 @@ import sqlite3Store from 'connect-sqlite3';
 import databaseInit from './databaseInit.js';
 import taskRouter from './routes/taskRouter.js';
 import cors from "cors";
+import tagRouter from './routes/tagRoutes.js';
 
 
 const database = new DatabaseSync('./database.db')
@@ -20,7 +21,6 @@ app.use(express.json());
 const isProd = process.env.NODE_ENV === 'production';
 
 app.use(cors({
-    // Na produkcji pozwalamy na ten sam origin, na devie na port 5173
     origin: isProd ? false : 'http://localhost:5173', 
     credentials: true
 }));
@@ -49,6 +49,7 @@ app.use(cookieParser());
 // Routes
 app.use("/user", userRouter(database));
 app.use("/task", taskRouter(database));
+app.use("/tag", tagRouter(database));
 app.use(handler)
 
 

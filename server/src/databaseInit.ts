@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 
 export default function databaseInit(database:DatabaseSync){
+    database.exec("PRAGMA foreign_keys = ON;")
     database.exec(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nickname TEXT NOT NULL UNIQUE,

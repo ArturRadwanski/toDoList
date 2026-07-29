@@ -5,6 +5,8 @@
     import { useDashboardState } from "./shared_dashboard_state.svelte";
     import TaskCard from "./task_card.svelte";
 
+
+    //toDo display tasks without tags or require tasks to have tags
     const dashboard = useDashboardState();
     let tasks = dashboard.tasks;
     let tags = dashboard.tags;
@@ -28,17 +30,18 @@
     }))
     console.log(tasks);
 
-    function onclick_debug(){
-        $inspect(selectedTags)
-    }
-    function filter_all_dates(){
+    function filterAllDates(){
         startDate = null;
         endDate = null;
     }
-    function filter_today(){
+    function filterToday(){
         startDate = new Date().toISOString().slice(0,10);
         endDate = new Date().toISOString().slice(0,10);
         console.log(startDate)
+    }
+
+    function quickChangeStatus(task:Task){
+        task.ended = !task.ended;
     }
 </script>
 
@@ -54,6 +57,7 @@
     .dropdown-item {
   display: flex;
   align-items: center;
+  justify-content:space-between;
   padding: 8px 16px;
   color: #1D2A44;
   cursor: pointer;
@@ -78,7 +82,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div id="container" onclick={onclick_debug}>
+<div id="container">
 <h2>Your's Tasks</h2>
 <div id="select-container" >
 <CustomSelect title="Tags">
@@ -106,14 +110,16 @@
 
 <CustomSelect title="Date Range">
 <label class="dropdown-item">
+    <span>from:</span>
     <input type="date" bind:value={startDate}/>
 </label>
 <label class="dropdown-item">
+    <span>to:</span>
     <input type="date" bind:value={endDate}/>
 </label>
 <div class="dropdown-item">
-    <button onclick={filter_all_dates}>All</button>
-    <button onclick={filter_today}>Today</button>
+    <button onclick={filterAllDates}>All</button>
+    <button onclick={filterToday}>Today</button>
 </div>
 </CustomSelect>
 <CustomSelect title="Status">
@@ -144,7 +150,6 @@
         <span>Priority</span>
     </label>
 </CustomSelect>
-<!--ToDo rest of the selects-->
 
 </div>
 <input type="text" id="taks-search" placeholder="Search for task..." />
@@ -154,9 +159,9 @@
         && selectedPriorities.includes(task.priority) 
         && (startDate === null || task.requiredBy >= Date.parse(startDate))
         && (endDate === null || task.requiredBy <= Date.parse(endDate))
-        && (status === null || status && task.ended != null || !status && task.ended === null)}
+        && (status === null || status === task.ended)}
         {#if included}
-            <TaskCard name = {task.name} priority = {task.priority} tags = {task.tags}/>
+            <TaskCard {task}/>
         {/if}
     {/each}
 </div>

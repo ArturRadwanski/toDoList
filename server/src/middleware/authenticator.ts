@@ -6,5 +6,5 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     }
     res.statusCode = 401;
     res.statusMessage = "Session has ended";
-    res.send();
+    return res.send();
 };

@@ -3,7 +3,7 @@ export default interface Task {
     name: string;
     description: string;
     requiredBy: number;
-    ended: number | null;
+    ended: boolean;
     priority: number;
     tags: number[]
 }

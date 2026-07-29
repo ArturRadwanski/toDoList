@@ -3,6 +3,7 @@
     import { goto } from "$app/navigation";
     import BackgroundImage from "../components/background_image.svelte";
     import { PUBLIC_API_URL } from "$env/static/public";
+    import { userState } from "$lib/userState.svelte";
 
     let err_message = $state("");
 
@@ -22,6 +23,7 @@
             err_message = respone.statusText;
         }
         else {
+            userState.setNickname(nickname.trim())
             goto("/dashboard");
         }
     }

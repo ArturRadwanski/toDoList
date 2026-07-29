@@ -1,31 +1,32 @@
 <script lang="ts">
     import type Task from "$lib/types/task";
     import type Tag from "$lib/types/tag";
-    const {data}: {data:{
-        tags:Tag[],
-        tasks:Task[]
-    }} = $props();
-    const tags = $state(data.tags)
+    import { userState } from "$lib/userState.svelte";
+    import { useDashboardState } from "./shared_dashboard_state.svelte";
+    
+    let sharedState = useDashboardState();
+
+
 </script>
 
 <style>
 #container {
     background-color: var(--color-sidebar);
     color: whitesmoke;
+    border-radius: var(--radius-main) 0 0 var(--radius-main);
+    padding: 5px;
 }
 </style>
 
 <div id="container" >
     <h2>TaskFlow</h2>
     <div id="bookmarks">
-        <p>Today</p>
-        <p>Upcoming</p>
-        <p>Important</p>
+        <button onclick={() => sharedState.openCreateModal()}>Add Task</button>
     </div>
     <div id="account">
     <!--TO DO style it correctly-->
     <hr>
-        <p>nickname</p>
+        <p>{userState.nickname}</p>
         <button>settings</button>
         <button>Log out</button>
     </div>

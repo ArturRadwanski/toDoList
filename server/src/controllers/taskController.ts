@@ -3,57 +3,6 @@ import { DatabaseSync} from 'node:sqlite';
 
 //In this controller req.session.userId will always exist because of authenticator middleware connected in the router
 
-/*
-req.body : {
-    name:string,
-    color: {hue:number, saturation:number, lightness: number}
-}
-*/
-export async function addTag(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
-    if(req.body.name === undefined || req.body.color === undefined){
-        res.statusCode=400;
-        res.statusMessage="Incorrect request body";
-        return res.send();
-    }
-    const name = String(req.body.name).trim();
-    const color: {hue:number, saturation:number, lightness: number} = req.body.color;
-    if(color.hue === undefined || color.saturation === undefined || color.lightness === undefined){
-        res.statusCode=400;
-        res.statusMessage="Incorrect request body";
-        return res.send();
-    }
-    const user_id = req.session.userId!;
-    const name_regex = /^[a-zA-Z0-9 ]*$/ //allow only letter,numbers and blank space
-    if(!name_regex.test(name)){
-        res.statusCode=400;
-        res.statusMessage = "Incorrect name for a tag! Use only letter/numbers/blankspace"
-        return res.send();
-    }
-    try{
-        const querry = database.prepare("INSERT INTO tags (user_id, name, hue, saturation, lightness) VALUES (?, ?, ?, ?, ?)");
-        querry.run(user_id, name, color.hue, color.saturation, color.lightness);
-        return res.sendStatus(201);
-    }
-    catch(err:any){
-        console.log(err);
-        if(err.code == 'ERR_SQLITE_ERROR' && err.errstr == 'constraint failed'){
-            console.log(err.message);
-            if(err.message == "FOREIGN KEY constraint failed"){
-                res.statusCode = 404;
-                res.statusMessage = "Could not find user with this id";
-                return res.send();
-            }
-            if(err.message == "UNIQUE constraint failed: tags.user_id, tags.name"){
-                res.statusCode = 400;
-                res.statusMessage = "You already have a tag with this name!"
-                return res.send();
-            }
-            
-
-        }
-        return res.sendStatus(500);
-    }
-}
 
 /*
 req.body: {
@@ -82,8 +31,8 @@ export async function addTask(req:Request, res:Response, next:NextFunction, data
     }
     try{
     database.exec("BEGIN TRANSACTION");
-    const querry = database.prepare("INSERT INTO tasks (name, description, required_by, priority, user_id) VALUES (?, ?, ?, ?, ?)");
-    const result = querry.run(name, description, requiredBy, Math.floor(priority) % 3, user_id);
+    const querry = database.prepare("INSERT INTO tasks (name, description, required_by, priority, user_id, ended) VALUES (?, ?, ?, ?, ?, 0)");
+    const result = querry.run(name, description, requiredBy, priority, user_id);
     const taskId = result.lastInsertRowid;
 
 
@@ -152,10 +101,118 @@ export async function getTasks(req:Request, res:Response, next:NextFunction, dat
 
 }
 
-export async function getTags(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
-    const user_id = req.session.userId!;
-    
-    const querry = database.prepare("SELECT * FROM tags WHERE user_id = ?")
-    const result = querry.all(user_id);
-    res.json(result);
+
+
+
+/*
+req.body: {
+taskId: number
+}
+
+
+*/
+export async function deleteTask(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
+    const userId = req.session.userId!;
+    const taskId = req.body.taskId;
+    if (taskId === undefined){
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect request body";
+        return res.send();
+    }
+
+    const querry = database.prepare("DELETE FROM tasks WHERE id = ? AND user_id = ?");
+    const result = querry.run(taskId, userId);
+
+    if(result.changes === 0){
+        res.statusCode = 404;
+        res.statusMessage = "User does not have task with requested id";
+        return res.send();
+    }
+
+    res.statusCode = 200;
+    res.statusMessage = "Task deleted";
+    return res.send();
+}
+
+/*
+req.body: {
+    taskId: number,
+    name: string,
+    description: string,
+    requiredBy: number,
+    priority: number,
+    newTags: number[],
+    removedTags:number[]
+}
+*/
+
+export async function editTask(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
+    const userId = req.session.userId!;
+
+    const taskId = req.body.id;
+    const name = req.body.name;
+    const description = req.body.description;
+    const requiredBy = req.body.requiredBy;
+    const priority = req.body.priority;
+    const newTags = req.body.newTags;
+    const removedTags = req.body.removedTags;
+
+    console.log(req.body);
+
+    if(
+        taskId === undefined || name === undefined || description === undefined || 
+        requiredBy === undefined || priority === undefined || newTags === undefined ||
+        removedTags === undefined
+    ) {
+        res.statusCode = 400;
+        res.statusMessage = "Incorrect request body"
+        return res.send();       
+    }
+    try {
+        database.exec("BEGIN TRANSACTION");
+        const querry = database.prepare(`UPDATE tasks SET name = ?, description = ?, 
+            required_by = ?, priority = ? WHERE id = ? AND user_id = ?`);
+        const result = querry.run(name, description, requiredBy, priority, taskId, userId);
+
+        if(result.changes === 0){
+            database.exec("ROLLBACK");
+            res.statusCode = 404;
+            res.statusMessage = "User does not have task with requested id";
+            return res.send();
+        }
+
+        const addTagQuerry = database.prepare("INSERT INTO task_tags (tag_id, task_id) VALUES (?, ?)");
+        (newTags as number[]).forEach(tag => addTagQuerry.run(tag, taskId));
+
+        const removeTagQuerry = database.prepare("DELETE FROM task_tags WHERE tag_id = ? AND task_id = ?");
+        (removedTags as number[]).forEach(tag => removeTagQuerry.run(tag, taskId));
+
+        database.exec("COMMIT");
+
+        res.statusCode = 200;
+        res.statusMessage = "Task edited";
+        return res.send();
+
+    } catch (err:any) {
+        console.log(err);
+        try {
+            database.exec("ROLLBACK");
+        }
+        catch (err:any) {
+            res.statusCode = 503;
+            res.statusMessage = "Database is down";
+            res.send();
+        }
+        if(err.code == 'ERR_SQLITE_ERROR' && err.errstr == 'constraint failed'){
+            console.log(err.message);
+            if(err.message == "FOREIGN KEY constraint failed"){
+                res.statusCode = 400;
+                res.statusMessage = "Operation did not complete";
+                return res.send();
+            }
+        }
+        return res.sendStatus(500);
+    }
+
+
 }

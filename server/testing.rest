@@ -37,7 +37,7 @@ Content-Type: application/json
 GET http://127.0.0.1:3000/user/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuaWNrbmFtZSI6ImFiZGRkYXNmYXNmY2Rhc2RkZGQiLCJlbWFpbCI6ImJhc2ZhYXNkZnNhYWthYUBhYi5wbCIsImlhdCI6MTc4MzAxODA4MSwiZXhwIjoxNzgzMDE4MzgxfQ.Ncblp2x2pSy2s8y121hsqM2Bz1ovsyxeWmYSyWechvU HTTP/1.1
 
 ###
-POST http://127.0.0.1:3000/task/tag HTTP/1.1
+POST http://127.0.0.1:3000/tag HTTP/1.1
 Content-Type: application/json
 
 {
@@ -65,4 +65,4 @@ Content-Type: application/json
 GET http://127.0.0.1:3000/task/ HTTP/1.1
 
 ###
-GET http://127.0.0.1:3000/task/tag HTTP/1.1
+GET http://127.0.0.1:3000/tag HTTP/1.1

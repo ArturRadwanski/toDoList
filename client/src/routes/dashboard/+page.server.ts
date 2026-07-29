@@ -6,7 +6,7 @@ import type Tag from "$lib/types/tag";
 
 export const load:PageServerLoad = async ({fetch}) => {
     const taskResponse = await fetch(`${PUBLIC_API_URL}/task/`);
-    const tagResponse = await fetch(`${PUBLIC_API_URL}/task/tag`);
+    const tagResponse = await fetch(`${PUBLIC_API_URL}/tag`);
     if(!tagResponse.ok || !taskResponse.ok){
         redirect(307, "/");
     }

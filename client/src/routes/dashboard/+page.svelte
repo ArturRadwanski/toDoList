@@ -6,9 +6,10 @@ import MainWindow from "./main_window.svelte";
 import type Tag from "$lib/types/tag";
 import type { PageData } from "./$types";
 import { initDashboardState } from "./shared_dashboard_state.svelte";
+    import AddTaskWindow from "./add_task_window.svelte";
 
 let { data }: {data: PageData} = $props();
-initDashboardState(data.tasks, data.tags.map((element) => {
+let sharedState = initDashboardState(data.tasks, data.tags.map((element) => {
     return {...element, checked:true} //by default show all tags
 }));
 
@@ -41,7 +42,6 @@ initDashboardState(data.tasks, data.tags.map((element) => {
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: 24px;
         flex-direction:row;
     }
     .dashboard{
@@ -55,8 +55,11 @@ initDashboardState(data.tasks, data.tags.map((element) => {
 <div class="container" >
 <div class="outer">
     <div class="inner">
-    <SideBar {data} />
-    <MainWindow/>
+    <SideBar />
+    <MainWindow />
+    {#if sharedState.activeTask != null}
+    <AddTaskWindow />
+    {/if}
     </div>
 </div>
 </div>
