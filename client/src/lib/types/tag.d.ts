@@ -4,5 +4,4 @@ export default interface Tag {
     saturation: number;
     lightness: number;
     id:number;
-    checked: boolean;
 }

@@ -27,10 +27,18 @@ export async function addTag(req:Request, res:Response, next:NextFunction, datab
         res.statusMessage = "Incorrect name for a tag! Use only letter/numbers/blankspace"
         return res.send();
     }
+    //Prevent database from saving color values as Text is user sends infinity or -infinity
+    if(!Number.isSafeInteger(color.hue) || !Number.isSafeInteger(color.saturation) || !Number.isSafeInteger(color.lightness)){
+        res.statusMessage = "Incorrect color given in request!";
+        res.statusCode = 400;
+        return res.send(); 
+    }
     try{
         const querry = database.prepare("INSERT INTO tags (user_id, name, hue, saturation, lightness) VALUES (?, ?, ?, ?, ?)");
-        querry.run(user_id, name, color.hue, color.saturation, color.lightness);
-        return res.sendStatus(201);
+        const result = querry.run(user_id, name, color.hue, color.saturation, color.lightness);
+
+        res.statusCode = 201
+        return res.json({id: result.lastInsertRowid});
     }
     catch(err:any){
         console.log(err);

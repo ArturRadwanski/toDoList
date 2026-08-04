@@ -7,11 +7,10 @@ import type Tag from "$lib/types/tag";
 import type { PageData } from "./$types";
 import { initDashboardState } from "./shared_dashboard_state.svelte";
     import AddTaskWindow from "./add_task_window.svelte";
+    import AddTagWindow from "./add_tag_window.svelte";
 
 let { data }: {data: PageData} = $props();
-let sharedState = initDashboardState(data.tasks, data.tags.map((element) => {
-    return {...element, checked:true} //by default show all tags
-}));
+let sharedState = initDashboardState(data.tasks, data.tags);
 
 </script>
 
@@ -59,6 +58,9 @@ let sharedState = initDashboardState(data.tasks, data.tags.map((element) => {
     <MainWindow />
     {#if sharedState.activeTask != null}
     <AddTaskWindow />
+    {/if}
+    {#if sharedState.activeTag != null}
+    <AddTagWindow />
     {/if}
     </div>
 </div>

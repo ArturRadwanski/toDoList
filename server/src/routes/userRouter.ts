@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import { DatabaseSync } from 'node:sqlite';
-import {addNewUser, logIn, deleteAccount, verifyEmail} from '../controllers/userController.js';
+import {addNewUser, logIn, deleteAccount, verifyEmail, logOut} from '../controllers/userController.js';
 import {check} from 'express-validator';
 
 export default function userRouter(database:DatabaseSync){
@@ -9,6 +9,7 @@ export default function userRouter(database:DatabaseSync){
     router.post("/login", [check('nickname').trim().escape()], (req:Request, res:Response, next:NextFunction) => logIn(req, res, next, database));
     //router.post("/refresh", (req, res, next) => refresh(req, res, next,database));
     router.delete("/", (req, res, next) => deleteAccount(req, res, next, database));
-    router.get("/verify/*emailKey", (req, res, next) => verifyEmail(req, res, next, database))
+    router.get("/verify/*emailKey", (req, res, next) => verifyEmail(req, res, next, database));
+    router.post("/logout", logOut);
     return router;
 }

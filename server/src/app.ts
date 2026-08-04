@@ -40,7 +40,7 @@ app.use(session({
     rolling: true,
     cookie: {
         secure: false,
-        maxAge: 1000 * 60 * 15, // session ends after 15 minutes of inactivity
+        maxAge: 1000 * 60 * 30, // session ends after 30 minutes of inactivity
         httpOnly: true,
     }
 }))

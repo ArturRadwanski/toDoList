@@ -127,6 +127,19 @@ export async function logIn(req:Request, res:Response, next:NextFunction, databa
     }
 }
 
+
+export async function logOut(req:Request, res:Response, next:NextFunction) {
+    const cookieName = "connect.sid";
+
+    req.session.destroy((err) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+            res.clearCookie(cookieName)
+            return res.sendStatus(200)
+    })
+
+}
 /*
 req body: {refreshToken: string}
 

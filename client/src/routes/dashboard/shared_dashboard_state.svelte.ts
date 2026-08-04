@@ -9,11 +9,24 @@ class DashboardState {
     activeTask = $state<Partial<Task> | null>(null); //Task which is currently edited/created. 
     // Window for edition is closed when it's equal to null; 
 
+    activeTag = $state<Tag | null>(null); //Tag which is currentyl created 
     constructor(initialTasks: Task[], initialTags: Tag[]) {
         this.tasks = initialTasks;
         this.tags = initialTags;
     }
 
+    openCreateTag() {
+        this.activeTag = {name: "Tag",
+            hue: Math.random() * 359,
+            saturation: Math.random() * 100,
+            lightness: Math.random() * 100,
+            id: -1 // placeholder id
+        }
+    }
+
+    closeCreateTag() {
+        this.activeTag = null;
+    }
     openCreateModal() {
         this.activeTask = {
             name: '',

@@ -71,8 +71,8 @@
     {@const currentTag = tagObjects.find(t => t.id === tagId)}
     {#if currentTag}
         <p class="tag"
-        style:background-color="hsl({currentTag.hue}, {currentTag.saturation}%, {currentTag.lightness + 40}%)"
-        style:color="hsl({currentTag.hue}, {currentTag.saturation}%, {currentTag.lightness - 20}%)"
+        style:background-color="hsl({currentTag.hue}, {currentTag.saturation}%, {currentTag.lightness}%)"
+        style:color="{currentTag.lightness > 60 ? "black" : "white"}"
         >{currentTag.name} </p>
     {/if}
     {/each}

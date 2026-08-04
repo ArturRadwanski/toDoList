@@ -80,8 +80,8 @@ export async function getTasks(req:Request, res:Response, next:NextFunction, dat
             t.priority,
             GROUP_CONCAT(tg.id) AS task_tags
         FROM tasks AS t
-        JOIN task_tags AS t_tg ON t.id = t_tg.task_id
-        JOIN tags AS tg on t_tg.tag_id = tg.id
+        LEFT JOIN task_tags AS t_tg ON t.id = t_tg.task_id
+        LEFT JOIN tags AS tg on t_tg.tag_id = tg.id
         WHERE t.user_id = ?
         GROUP BY t.id`);
     const result = querry.all(user_id);

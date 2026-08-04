@@ -6,11 +6,10 @@
     import TaskCard from "./task_card.svelte";
 
 
-    //toDo display tasks without tags or require tasks to have tags
     const dashboard = useDashboardState();
     let tasks = dashboard.tasks;
     let tags = dashboard.tags;
-    let selectedTags = $state(tags.map((element) => element.id));
+    let selectedTags = $state<number[]>([]);
     let selectedPriorities = $state([0,1,2]);
     let startDate = $state<string | null>(null);
     let endDate = $state<string | null>(null);
@@ -86,7 +85,7 @@
 <h2>Your's Tasks</h2>
 <div id="select-container" >
 <CustomSelect title="Tags">
-{#each tags as tag}
+{#each tags as tag (tag.id)}
     <label class="dropdown-item">
       <input type="checkbox" bind:group={selectedTags} value={tag.id}/>
       <span>{tag.name}</span>
@@ -154,8 +153,11 @@
 </div>
 <input type="text" id="taks-search" placeholder="Search for task..." />
 <div id="task-container">
+
     {#each sortedTasks as task (task.id)}
-        {@const included = task.tags.some(element => selectedTags.includes(element))
+        <!--filter tasks by currently selected filters -->
+        {@const included = 
+        (selectedTags.length === 0 || task.tags.some(element => selectedTags.includes(element)))
         && selectedPriorities.includes(task.priority) 
         && (startDate === null || task.requiredBy >= Date.parse(startDate))
         && (endDate === null || task.requiredBy <= Date.parse(endDate))

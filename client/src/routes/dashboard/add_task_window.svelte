@@ -88,7 +88,7 @@ async function editTask(){
 <style>
     dialog {
         width: 40vw;
-        height: 40vh;
+        height: 60vh;
     }
     #container {
         display: flex;
@@ -155,7 +155,7 @@ async function editTask(){
     </div>
     <div class="input-container">
         <CustomSelect title="Tags">
-            {#each tags as tag}
+            {#each tags as tag (tag.id)}
                 <label class="dropdown-item">
                     <input type="checkbox" bind:group={activeTask.tags} value={tag.id}/>
                     <span>{tag.name}</span>
