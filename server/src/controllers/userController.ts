@@ -29,7 +29,7 @@ export async function addNewUser(req:Request, res:Response, next:NextFunction, d
         return res.send();
     }
     const email = email_raw.toLowerCase();
-    const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm
+    const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/
 
 
     if(!emailRegex.test(email)){
@@ -38,6 +38,12 @@ export async function addNewUser(req:Request, res:Response, next:NextFunction, d
         return res.send();
     }
 
+
+    if(password.length < 8) {
+        res.statusCode = 400;
+        res.statusMessage= "Password is too short";
+        return res.send();
+    }
     const hash:string = await bcrypt.hash(password + config.pepper, salt);
 
     
