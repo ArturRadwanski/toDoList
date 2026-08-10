@@ -37,7 +37,7 @@
     <h2>TaskFlow</h2>
     <div id="bookmarks">
         <button onclick={() => sharedState.openCreateModal()}>Add Task</button>
-        <button onclick={() => sharedState.openCreateTag()}>Add Tag</button>
+        <button onclick={() => sharedState.openTagModal()}>Add Tag</button>
     </div>
     <div id="account">
     <!--TO DO style it correctly-->

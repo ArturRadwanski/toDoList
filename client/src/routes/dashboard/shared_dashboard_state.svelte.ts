@@ -9,22 +9,35 @@ class DashboardState {
     activeTask = $state<Partial<Task> | null>(null); //Task which is currently edited/created. 
     // Window for edition is closed when it's equal to null; 
 
-    activeTag = $state<Tag | null>(null); //Tag which is currentyl created 
+    activeTag = $state<Tag | null>(null); //Tag which is currenttly created 
     constructor(initialTasks: Task[], initialTags: Tag[]) {
         this.tasks = initialTasks;
         this.tags = initialTags;
     }
 
-    openCreateTag() {
-        this.activeTag = {name: "Tag",
+    
+    selectedTask = $state<Task | null>(null);//Task which is currently displayed in detail
+
+    openDetailsModal(task: Task) {
+        this.selectedTask = task;
+    }
+
+    closeDetailsModal() {
+        this.selectedTask = null;
+    }
+
+    openTagModal(tag?: Tag) {
+
+        this.activeTag = tag ? tag : {name: "Tag",
             hue: Math.random() * 359,
             saturation: Math.random() * 100,
             lightness: Math.random() * 100,
             id: -1 // placeholder id
         }
+
     }
 
-    closeCreateTag() {
+    closeTagModal() {
         this.activeTag = null;
     }
     openCreateModal() {
@@ -53,7 +66,13 @@ class DashboardState {
     deleteTask(taskId: number) {
         const index = this.tasks.findIndex(t => t.id === taskId);
         if (index !== -1) {
-            this.tasks.splice(index, 1); 
+            const deleted = this.tasks.splice(index, 1);
+            if(deleted[0].id === this.activeTask?.id){
+                this.closeModal();
+            } 
+            if(deleted[0].id === this.selectedTask?.id){
+                this.closeDetailsModal();
+            }
     }
     }
 

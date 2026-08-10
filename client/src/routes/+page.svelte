@@ -109,7 +109,7 @@
             <p><b>Forgot Password?</b></p>
             <button disabled="{is_empty}" {onclick}>Log In</button>
         </div>
-        <p>Don't have an account? <b>Sign up</b></p>
+        <p>Don't have an account? <a href="/register"><b>Sign up</b></a></p>
         {#if err_message != ""}
             <p class="error">{err_message}</p>
         {/if}

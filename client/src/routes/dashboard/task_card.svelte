@@ -24,8 +24,8 @@
         dashboard.deleteTask(task.id);
     }
 
-    function editTask(){
-        dashboard.openEditModal(task);
+    function details(){
+        dashboard.openDetailsModal(task);
     }
 </script>
 
@@ -78,5 +78,5 @@
     {/each}
     </div>
     <button id="delete-task" onclick={deleteTask}>Delete task</button>
-    <button id="edit-task" onclick={editTask}>Edit task</button>
+    <button id="edit-task" onclick={details}>Details</button>
 </div>
