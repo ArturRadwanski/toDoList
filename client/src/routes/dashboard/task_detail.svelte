@@ -17,7 +17,7 @@
 
     function formatDate(timestamp: number) {
         if (!timestamp) return 'Brak terminu';
-        return new Date(timestamp).toLocaleDateString('pl-PL', {
+        return new Date(timestamp).toLocaleDateString('en-En', {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
@@ -70,7 +70,7 @@
       <header class="modal-header">
         <label class="status-checkbox">
             <input type="checkbox" bind:checked={task.ended} />
-            <span class="status-text">{task.ended ? 'Wykonane' : 'Do zrobienia'}</span>
+            <span class="status-text">{task.ended ? 'Done' : 'To do'}</span>
         </label>
         <button class="close-btn" onclick={() => sharedState.closeDetailsModal()}>✕</button>
       </header>
@@ -79,19 +79,19 @@
 
       <div class="meta-grid">
         <div class="meta-item">
-          <span class="meta-label">Priorytet</span>
+          <span class="meta-label">Priority</span>
           <span class="prio-badge {prio.class}">{prio.label}</span>
         </div>
 
         <div class="meta-item">
-          <span class="meta-label">Termin</span>
+          <span class="meta-label">Due date</span>
           <span class="date-value">📅 {formatDate(task.requiredBy)}</span>
         </div>
       </div>
 
       {#if task.tags && task.tags.length > 0}
         <div class="section">
-          <span class="meta-label">Tagi</span>
+          <span class="meta-label">Tags</span>
           <div class="tags-wrapper">
             {#each task.tags as tagId}
               {@const currentTag = tags.find(t => t.id === tagId)}
@@ -110,7 +110,7 @@
       {/if}
 
       <div class="section">
-        <span class="meta-label">Opis</span>
+        <span class="meta-label">Description</span>
         <div class="description-box">
           {task.description || 'Brak opisu dla tego zadania.'}
         </div>
@@ -118,10 +118,10 @@
 
       <footer class="modal-footer">
         <div class="left-actions">
-            <button class="btn btn-danger" onclick={handleDelete}>Usuń</button>
-            <button class="btn btn-secondary" onclick={handleEdit}>Edytuj</button>
+            <button class="btn btn-danger" onclick={handleDelete}>Delete</button>
+            <button class="btn btn-secondary" onclick={handleEdit}>Edit</button>
         </div>
-        <button class="btn btn-primary" onclick={() => sharedState.closeDetailsModal()}>Zamknij</button>
+        <button class="btn btn-primary" onclick={() => sharedState.closeDetailsModal()}>Close</button>
       </footer>
 
     </div>

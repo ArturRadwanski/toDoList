@@ -125,7 +125,7 @@
             <input type="password" placeholder="Repeat password" name="passwordRepeat" id="password-repeat" bind:value={passwordRepeat}/>
             <button disabled="{passwordTip !== ""}" {onclick}>Sign up</button>
         </div>
-        <p>Already have an account? <b>Log in</b></p>
+        <p>Already have an account? <a href="/"><b>Log in</b></a></p>
         {#if err_message != ""}
             <p class="error">{err_message}</p>
         {/if}

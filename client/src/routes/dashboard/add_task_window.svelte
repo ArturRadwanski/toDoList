@@ -86,8 +86,19 @@
             <h3>{activeTask.id === undefined ? 'Create New Task' : 'Edit Task'}</h3>
             <button class="close-btn" onclick={() => sharedState.closeModal()} aria-label="Close">✕</button>
         </header>
-
+        
         <div class="form-body">
+            <div class="input-container">
+                <span class="meta-label">Tags</span>
+                <CustomSelect title="Select Tags">
+                    {#each tags as tag (tag.id)}
+                        <label class="dropdown-item">
+                            <input type="checkbox" bind:group={activeTask.tags} value={tag.id}/>
+                            <span>{tag.name}</span>
+                        </label>
+                    {/each}    
+                </CustomSelect>
+                </div>
             <div class="input-container">
                 <label for="task-name" class="meta-label">Task Name</label>
                 <input id="task-name" type="text" placeholder="Enter task title..." bind:value={activeTask.name}/>
@@ -98,10 +109,12 @@
                 <textarea id="task-desc" placeholder="Add additional details..." bind:value={activeTask.description}></textarea>
             </div>
 
+            
+
             <div class="form-row">
                 <div class="input-container flex-1">
                     <label for="task-date" class="meta-label">Required By</label>
-                    <input id="task-date" type="date" bind:value={dateString}/>
+                    <input id="task-date" type="date" bind:value={dateString.value}/>
                 </div>
 
                 <div class="input-container flex-1">
@@ -114,17 +127,7 @@
                 </div>
             </div>
 
-            <div class="input-container">
-                <span class="meta-label">Tags</span>
-                <CustomSelect title="Select Tags">
-                    {#each tags as tag (tag.id)}
-                        <label class="dropdown-item">
-                            <input type="checkbox" bind:group={activeTask.tags} value={tag.id}/>
-                            <span>{tag.name}</span>
-                        </label>
-                    {/each}    
-                </CustomSelect>
-            </div>
+            
         </div>
 
         <footer class="modal-footer">

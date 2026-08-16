@@ -44,127 +44,269 @@
     }
 </script>
 
+<div id="main-container">
+    <header class="main-header">
+        <h2>Your Tasks</h2>
+        
+        <!-- Pasek wyszukiwania -->
+        <div class="search-wrapper">
+            <input 
+                type="text" 
+                id="task-search" 
+                placeholder="Search for task..." 
+            />
+        </div>
+    </header>
+
+    <!-- Pasek filtrów i sortowania -->
+    <div id="select-container">
+        <CustomSelect title="Tags">
+            {#each tags as tag (tag.id)}
+                <label class="dropdown-item">
+                    <input type="checkbox" bind:group={selectedTags} value={tag.id}/>
+                    <span>{tag.name}</span>
+                </label>
+            {/each}    
+        </CustomSelect>
+
+        <CustomSelect title="Priority">
+            <label class="dropdown-item">
+                <input type="checkbox" bind:group={selectedPriorities} value={0} />
+                <span>Low</span>
+            </label>
+            <label class="dropdown-item">
+                <input type="checkbox" bind:group={selectedPriorities} value={1} />
+                <span>Medium</span>
+            </label>
+            <label class="dropdown-item">
+                <input type="checkbox" bind:group={selectedPriorities} value={2} />
+                <span>High</span>
+            </label>
+        </CustomSelect>
+
+        <CustomSelect title="Date Range">
+            <label class="dropdown-item date-input-label">
+                <span class="date-prefix">From:</span>
+                <input type="date" class="date-picker" bind:value={startDate}/>
+            </label>
+            <label class="dropdown-item date-input-label">
+                <span class="date-prefix">To:</span>
+                <input type="date" class="date-picker" bind:value={endDate}/>
+            </label>
+            <div class="dropdown-item date-quick-actions">
+                <button class="filter-btn" onclick={filterAllDates}>All</button>
+                <button class="filter-btn" onclick={filterToday}>Today</button>
+            </div>
+        </CustomSelect>
+
+        <CustomSelect title="Status">
+            <label class="dropdown-item">
+                <input type="radio" bind:group={status} value={null}/>
+                <span>All</span> 
+            </label>
+            <label class="dropdown-item">
+                <input type="radio" bind:group={status} value={true}/>
+                <span>Completed</span> 
+            </label>
+            <label class="dropdown-item">
+                <input type="radio" bind:group={status} value={false}/>
+                <span>Uncompleted</span> 
+            </label>
+        </CustomSelect>
+
+        <CustomSelect title="Sort by">
+            <label class="dropdown-item">
+                <input type="radio" bind:group={sortBy} value="requiredBy"/>
+                <span>Date</span>
+            </label>
+            <label class="dropdown-item">
+                <input type="radio" bind:group={sortBy} value="name"/>
+                <span>Name</span>
+            </label>
+            <label class="dropdown-item">
+                <input type="radio" bind:group={sortBy} value="priority"/>
+                <span>Priority</span>
+            </label>
+        </CustomSelect>
+    </div>
+
+    <!-- Lista zadań -->
+    <div id="task-container">
+        {#each sortedTasks as task (task.id)}
+            {@const included = 
+                (selectedTags.length === 0 || task.tags.some(element => selectedTags.includes(element)))
+                && selectedPriorities.includes(task.priority) 
+                && (startDate === null || task.requiredBy >= Date.parse(startDate))
+                && (endDate === null || task.requiredBy <= Date.parse(endDate))
+                && (status === null || status === task.ended)}
+            {#if included}
+                <TaskCard {task}/>
+            {/if}
+        {/each}
+    </div>
+</div>
+
 <style>
-    #container {
+    #main-container {
         display: flex;
         flex-direction: column;
+        flex: 1;
+        height: 100%;
+        padding: 24px;
+        background-color: var(--color-bg, #F4F6F9);
+        border-top-right-radius: var(--radius-main, 16px);
+        border-bottom-right-radius: var(--radius-main, 16px);
+        box-sizing: border-border-box;
+        overflow: hidden;
+        gap: 16px;
     }
+
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .main-header h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-title, #1a1a1a);
+        white-space: nowrap;
+    }
+
+    /* Pasek wyszukiwania */
+    .search-wrapper {
+        flex: 1;
+        max-width: 320px;
+    }
+
+    #task-search {
+        width: 100%;
+        padding: 8px 14px;
+        border: 1px solid var(--border-description, #e9ecef);
+        border-radius: var(--radius-card, 12px);
+        background-color: var(--color-card, #FFFFFF);
+        font-size: 14px;
+        color: var(--color-text-main, #1D2A44);
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #task-search:focus {
+        border-color: var(--color-primary, #007BFF);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    /* Kontener filtrów */
     #select-container {
         display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-bottom: 4px;
     }
 
-    .dropdown-item {
-  display: flex;
-  align-items: center;
-  justify-content:space-between;
-  padding: 8px 16px;
-  color: #1D2A44;
-  cursor: pointer;
-  font-size: 14px;
-  gap: 10px;
-  transition: background-color 0.2s;
-}
+    /* Stylowanie opcji wewnątrz dropdownów */
+    :global(.dropdown-item) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px;
+        color: var(--color-text-main, #1D2A44);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        gap: 10px;
+        border-radius: 6px;
+        transition: background-color 0.15s ease;
+    }
 
-.dropdown-item:hover {
-  background-color: #F4F6F9; 
-}
+    :global(.dropdown-item:hover) {
+        background-color: var(--color-bg, #F4F6F9); 
+    }
 
-.dropdown-item input[type="checkbox"] {
-  accent-color: #007BFF; 
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
+    :global(.dropdown-item input[type="checkbox"]),
+    :global(.dropdown-item input[type="radio"]) {
+        accent-color: var(--color-primary, #007BFF); 
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+
+    /* Wygląd datowników w dropdownie Date Range */
+    .date-input-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .date-prefix {
+        font-size: 12px;
+        color: var(--color-text-muted, #7D8A99);
+        font-weight: 600;
+    }
+
+    .date-picker {
+        border: 1px solid var(--border-description, #e9ecef);
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-size: 12px;
+        background-color: var(--bg-meta-grid, #f8f9fa);
+        color: var(--color-text-main, #1D2A44);
+        outline: none;
+    }
+
+    .date-quick-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        border-top: 1px solid var(--border-description, #e9ecef);
+        margin-top: 4px;
+        padding-top: 8px;
+    }
+
+    .filter-btn {
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: none;
+        background-color: var(--btn-secondary-bg, #e9ecef);
+        color: var(--btn-secondary-text, #495057);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.15s;
+    }
+
+    .filter-btn:hover {
+        background-color: #dee2e6;
+    }
+
+    /* Lista kart zadań z dedykowanym scrollem */
+    #task-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    /* Estetyczny pasek przewijania */
+    #task-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #task-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #task-container::-webkit-scrollbar-thumb {
+        background: #d0d7de;
+        border-radius: 10px;
+    }
+
+    #task-container::-webkit-scrollbar-thumb:hover {
+        background: #b0b8c1;
+    }
 </style>
-
-
-
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<div id="container">
-<h2>Your's Tasks</h2>
-<div id="select-container" >
-<CustomSelect title="Tags">
-{#each tags as tag (tag.id)}
-    <label class="dropdown-item">
-      <input type="checkbox" bind:group={selectedTags} value={tag.id}/>
-      <span>{tag.name}</span>
-    </label>
-  {/each}    
-</CustomSelect>
-<CustomSelect title="Priority">
-    <label class="dropdown-item">
-        <input type="checkbox" bind:group={selectedPriorities} value={0} />
-        <span>low</span>
-    </label>
-    <label class="dropdown-item">
-        <input type="checkbox" bind:group={selectedPriorities} value={1} />
-        <span>medium</span>
-    </label>
-    <label class="dropdown-item">
-        <input type="checkbox" bind:group={selectedPriorities} value={2} />
-        <span>high</span>
-    </label>
-</CustomSelect>
-
-<CustomSelect title="Date Range">
-<label class="dropdown-item">
-    <span>from:</span>
-    <input type="date" bind:value={startDate}/>
-</label>
-<label class="dropdown-item">
-    <span>to:</span>
-    <input type="date" bind:value={endDate}/>
-</label>
-<div class="dropdown-item">
-    <button onclick={filterAllDates}>All</button>
-    <button onclick={filterToday}>Today</button>
-</div>
-</CustomSelect>
-<CustomSelect title="Status">
-    <label class="dropdown-item">
-        <input type="radio" bind:group={status} value = {null}/>
-        <span>All</span> 
-    </label>
-    <label class="dropdown-item">
-        <input type="radio" bind:group={status} value = {true}/>
-        <span>Completed</span> 
-    </label>
-    <label class="dropdown-item">
-        <input type="radio" bind:group={status} value = {false}/>
-        <span>Uncompleted</span> 
-    </label>
-</CustomSelect>
-<CustomSelect title="Sort by">
-    <label class="dropdown-item">
-        <input type="radio" bind:group={sortBy} value="requiredBy"/>
-        <span>Date</span>
-    </label>
-    <label class="dropdown-item">
-        <input type="radio" bind:group={sortBy} value="name"/>
-        <span>Name</span>
-    </label>
-    <label class="dropdown-item">
-        <input type="radio" bind:group={sortBy} value="priority"/>
-        <span>Priority</span>
-    </label>
-</CustomSelect>
-
-</div>
-<input type="text" id="taks-search" placeholder="Search for task..." />
-<div id="task-container">
-
-    {#each sortedTasks as task (task.id)}
-        <!--filter tasks by currently selected filters -->
-        {@const included = 
-        (selectedTags.length === 0 || task.tags.some(element => selectedTags.includes(element)))
-        && selectedPriorities.includes(task.priority) 
-        && (startDate === null || task.requiredBy >= Date.parse(startDate))
-        && (endDate === null || task.requiredBy <= Date.parse(endDate))
-        && (status === null || status === task.ended)}
-        {#if included}
-            <TaskCard {task}/>
-        {/if}
-    {/each}
-</div>
-</div>
