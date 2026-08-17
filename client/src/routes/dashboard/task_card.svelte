@@ -8,8 +8,11 @@
     import { useDashboardState } from "./shared_dashboard_state.svelte";
     const dashboard = useDashboardState();
     let tagObjects = dashboard.tags;
+    let debouncer:number | undefined = undefined;
 
-    async function deleteTask() {
+
+    async function deleteTask(e:MouseEvent) {
+        e.stopPropagation();
         const response = await fetch(`${PUBLIC_API_URL}/task/`, {
             method: "DELETE",
             headers: {"Content-Type": "application/json"},
@@ -27,19 +30,71 @@
     function details(){
         dashboard.openDetailsModal(task);
     }
+
+    function toggleTask(e:MouseEvent){
+        clearTimeout(debouncer);
+        e.stopPropagation();
+        const checkbox = e.currentTarget as HTMLInputElement;
+        const currentValue = checkbox.checked;
+        task.ended = currentValue;
+
+
+        debouncer = setTimeout(async () => {
+            const response = await fetch(`${PUBLIC_API_URL}/task`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({...task, newTags: [], removedTags: []})
+        });
+
+        if (!response.ok) {
+            alert(`Server returned ${response.status} ${response.statusText}. Could not save change`);
+            task.ended = !currentValue;
+            return;
+        }
+        }, 500)
+
+    }
+    function formatDate() {
+        return new Date(task.requiredBy).toLocaleDateString('en-En', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+    function colorDate(){
+        const due = new Date(task.requiredBy)
+        const today = new Date();
+        const dangerousText = "color: var(--btn-danger-text);";
+
+        //if is split into several cases to increase readability even though it could be squeezed into one long condition
+        if (due.getFullYear() < today.getFullYear())
+            return dangerousText;
+        
+        else if(due.getFullYear() === today.getFullYear() && 
+                due.getMonth() < today.getMonth()) 
+            return dangerousText;
+
+        else if(due.getFullYear() === today.getFullYear() &&
+                due.getMonth() === today.getMonth() &&
+                due.getDate() <= today.getDate())
+            return dangerousText;
+        else 
+            return ""
+    }
 </script>
-<div class="task-card" class:completed={task.ended}>
-    <!-- Checkbox (po lewej) -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="task-card" class:completed={task.ended} onclick={details}>
     <input 
         type="checkbox" 
-        bind:checked={task.ended} 
+        onclick={toggleTask}
         class="task-checkbox"
     />
 
-    <!-- Środkowy kontener z tytułem, priorytetem i tagami -->
     <div class="task-info">
+        
         <h4 class="task-title">{task.name}</h4>
-
         <div class="task-meta">
             <span class="priority-badge prio-{task.priority}">
                 {#if task.priority == 0}
@@ -70,9 +125,11 @@
         </div>
     </div>
 
-    <!-- Przyciski akcji (po prawej) -->
+    <div>
+        <span style={colorDate()}>📅 {formatDate()}</span>
+    </div>
+
     <div class="task-actions">
-        <button class="btn btn-details" onclick={details}>Details</button>
         <button class="btn btn-delete" onclick={deleteTask} aria-label="Delete task">
             Delete
         </button>
@@ -96,6 +153,7 @@
 
     .task-card:hover {
         box-shadow: 0 4px 16px rgba(11, 37, 69, 0.08);
+        background-color: var(--btn-secondary-bg);
     }
 
     .task-card.completed {

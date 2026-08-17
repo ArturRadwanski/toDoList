@@ -15,6 +15,7 @@
     let endDate = $state<string | null>(null);
     let status = $state<boolean | null>(null); //true - show finished, false - show unfinished, null - show all
     let sortBy = $state("requiredBy");
+    let lookFor = $state<string>("");
 
     let sortedTasks = $derived([...tasks].sort((a,b) => {
         if (sortBy === "requiredBy"){
@@ -48,17 +49,18 @@
     <header class="main-header">
         <h2>Your Tasks</h2>
         
-        <!-- Pasek wyszukiwania -->
+    
         <div class="search-wrapper">
             <input 
                 type="text" 
                 id="task-search" 
                 placeholder="Search for task..." 
+                bind:value={lookFor}
             />
         </div>
     </header>
 
-    <!-- Pasek filtrów i sortowania -->
+
     <div id="select-container">
         <CustomSelect title="Tags">
             {#each tags as tag (tag.id)}
@@ -138,7 +140,8 @@
                 && selectedPriorities.includes(task.priority) 
                 && (startDate === null || task.requiredBy >= Date.parse(startDate))
                 && (endDate === null || task.requiredBy <= Date.parse(endDate))
-                && (status === null || status === task.ended)}
+                && (status === null || status === task.ended)
+                && (task.name.includes(lookFor) || lookFor.trim() === "")}
             {#if included}
                 <TaskCard {task}/>
             {/if}
@@ -156,9 +159,10 @@
         background-color: var(--color-bg, #F4F6F9);
         border-top-right-radius: var(--radius-main, 16px);
         border-bottom-right-radius: var(--radius-main, 16px);
-        box-sizing: border-border-box;
-        overflow: hidden;
+        box-sizing: border-box;
         gap: 16px;
+        position: relative;
+        min-height: 0;
     }
 
     .main-header {
@@ -206,6 +210,8 @@
         gap: 8px;
         flex-wrap: wrap;
         padding-bottom: 4px;
+        position: relative;
+        z-index: 10;
     }
 
     /* Stylowanie opcji wewnątrz dropdownów */

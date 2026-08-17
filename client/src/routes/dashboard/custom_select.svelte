@@ -31,7 +31,7 @@
 }
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px); /* Pokazuje się tuż pod przyciskiem */
+  top: calc(100% + 4px);
   left: 0;
   background-color: #FFFFFF;
   border-radius: 8px;

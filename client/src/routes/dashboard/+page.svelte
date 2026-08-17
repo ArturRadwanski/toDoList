@@ -24,7 +24,6 @@ let sharedState = initDashboardState(data.tasks, data.tags);
         width: 100vw;
         height: 100vh;
         margin: 0;
-        
     }
     
     .outer {
@@ -43,8 +42,9 @@ let sharedState = initDashboardState(data.tasks, data.tags);
         justify-content: center;
         text-align: center;
         flex-direction:row;
-        height: 85vh; 
-        overflow: hidden;
+        min-height: 60vh;
+        height: 70vh; 
+        overflow:visible;
     }
     .dashboard{
         color: red;
