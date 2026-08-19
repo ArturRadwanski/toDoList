@@ -25,13 +25,11 @@
 </script>
 
 <div id="sidebar-container">
-    <!-- Brand / Logotyp -->
     <div class="sidebar-header">
         <div class="brand-logo">TF</div>
         <h2>TaskFlow</h2>
     </div>
 
-    <!-- Akcje główne (Dodawanie) -->
     <div id="bookmarks">
         <button class="btn-sidebar btn-primary" onclick={() => sharedState.openCreateModal()}>
             <span class="btn-icon">+</span> Add Task
@@ -39,9 +37,11 @@
         <button class="btn-sidebar btn-secondary" onclick={() => sharedState.openTagModal()}>
             <span class="btn-icon">+</span> Add Tag
         </button>
+        <button class="btn-sidebar btn-dangerous" onclick={() => sharedState.setRemoveTagsMode(true)}>
+            <span class="btn-icon">-</span> Remove Tags
+        </button>
     </div>
 
-    <!-- Sekcja konta na dole -->
     <div id="account">
         <div class="user-info">
             <div class="avatar-placeholder">
@@ -54,7 +54,6 @@
         </div>
 
         <div class="account-actions">
-            <button class="btn-account">Settings</button>
             <button class="btn-account btn-logout" onclick={logOut}>Log out</button>
         </div>
     </div>
@@ -75,7 +74,6 @@
         box-sizing: border-box;
     }
 
-    /* Nagłówek i Logo */
     .sidebar-header {
         display: flex;
         align-items: center;
@@ -105,7 +103,6 @@
         color: #ffffff;
     }
 
-    /* Przycisk akcji dodawania */
     #bookmarks {
         display: flex;
         flex-direction: column;
@@ -157,7 +154,18 @@
         background-color: rgba(255, 255, 255, 0.15);
     }
 
-    /* Sekcja Konta (Dół paska) */
+    .btn-dangerous {
+        background-color:color-mix(in srgb, var(--btn-danger-bg) 70%, transparent) ;
+        color: color-mix(in srgb, var(--btn-danger-text) 60%, transparent) ;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-dangerous:hover {
+        background-color:color-mix(in srgb, var(--btn-danger-bg) 90%, transparent) ;
+        color: color-mix(in srgb, var(--btn-danger-text) 80%, transparent) ;
+    }
+    
+
     #account {
         margin-top: auto;
         padding-top: 16px;

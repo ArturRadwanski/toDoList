@@ -10,14 +10,19 @@ class DashboardState {
     // Window for edition is closed when it's equal to null; 
 
     activeTag = $state<Tag | null>(null); //Tag which is currenttly created 
+
+    removeTagsMode = $state<boolean>(false);
+    
+    selectedTask = $state<Task | null>(null);//Task which is currently displayed in detail
+
     constructor(initialTasks: Task[], initialTags: Tag[]) {
         this.tasks = initialTasks;
         this.tags = initialTags;
     }
-
     
-    selectedTask = $state<Task | null>(null);//Task which is currently displayed in detail
-
+    setRemoveTagsMode(mode:boolean){
+        this.removeTagsMode = mode;
+    }
     openDetailsModal(task: Task) {
         this.selectedTask = task;
     }
@@ -78,6 +83,23 @@ class DashboardState {
 
     addTag(newTag: Tag) {
         this.tags.push(newTag);
+    }
+
+    deleteTag(tagId: number){
+        const index = this.tags.findIndex(t => t.id === tagId);
+        if(index !== -1) {
+            this.tags.splice(index, 1);
+        }
+
+    }
+
+    removeTagFromTasks(tagId:number){
+        this.tasks.forEach(task => {
+            const index = task.tags.findIndex(t => t === tagId);
+            if(index !== -1){
+                task.tags.splice(index, 1);
+            }
+        });
     }
 
     editTask(taskId:number, updates: Partial<Task>){

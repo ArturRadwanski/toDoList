@@ -132,7 +132,6 @@
         </CustomSelect>
     </div>
 
-    <!-- Lista zadań -->
     <div id="task-container">
         {#each sortedTasks as task (task.id)}
             {@const included = 
@@ -180,7 +179,6 @@
         white-space: nowrap;
     }
 
-    /* Pasek wyszukiwania */
     .search-wrapper {
         flex: 1;
         max-width: 320px;
@@ -204,7 +202,6 @@
         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     }
 
-    /* Kontener filtrów */
     #select-container {
         display: flex;
         gap: 8px;
@@ -214,7 +211,6 @@
         z-index: 10;
     }
 
-    /* Stylowanie opcji wewnątrz dropdownów */
     :global(.dropdown-item) {
         display: flex;
         align-items: center;
@@ -241,7 +237,6 @@
         cursor: pointer;
     }
 
-    /* Wygląd datowników w dropdownie Date Range */
     .date-input-label {
         display: flex;
         align-items: center;
@@ -289,7 +284,6 @@
         background-color: #dee2e6;
     }
 
-    /* Lista kart zadań z dedykowanym scrollem */
     #task-container {
         display: flex;
         flex-direction: column;
@@ -298,7 +292,6 @@
         padding-right: 4px;
     }
 
-    /* Estetyczny pasek przewijania */
     #task-container::-webkit-scrollbar {
         width: 6px;
     }

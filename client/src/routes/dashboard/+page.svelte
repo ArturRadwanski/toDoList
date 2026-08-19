@@ -9,6 +9,7 @@ import { initDashboardState } from "./shared_dashboard_state.svelte";
     import AddTaskWindow from "./add_task_window.svelte";
     import AddTagWindow from "./add_tag_window.svelte";
     import TaskDetail from "./task_detail.svelte";
+    import RemoveTagsWindow from "./remove_tags_window.svelte";
 
 let { data }: {data: PageData} = $props();
 let sharedState = initDashboardState(data.tasks, data.tags);
@@ -67,6 +68,9 @@ let sharedState = initDashboardState(data.tasks, data.tags);
     {/if}
     {#if sharedState.selectedTask != null}
     <TaskDetail />
+    {/if}
+    {#if sharedState.removeTagsMode}
+    <RemoveTagsWindow />
     {/if}
     </div>
 </div>

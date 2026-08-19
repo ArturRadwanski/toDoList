@@ -202,7 +202,6 @@
         letter-spacing: 0.5px;
     }
 
-    /* Podgląd na żywo */
     .preview-box {
         display: flex;
         flex-direction: column;
@@ -247,7 +246,6 @@
         background-color: #ffffff;
     }
 
-    /* Color Picker */
     .color-picker-row {
         display: flex;
         align-items: center;
@@ -291,7 +289,6 @@
         font-family: monospace;
     }
 
-    /* Stopka */
     .modal-footer {
         display: flex;
         justify-content: flex-end;

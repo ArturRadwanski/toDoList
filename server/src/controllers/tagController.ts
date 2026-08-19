@@ -62,9 +62,21 @@ export async function addTag(req:Request, res:Response, next:NextFunction, datab
 }
 
 export async function getTags(req:Request, res:Response, next:NextFunction, database:DatabaseSync) {
-    const user_id = req.session.userId!;
+    const userId = req.session.userId!;
     
     const querry = database.prepare("SELECT * FROM tags WHERE user_id = ?")
-    const result = querry.all(user_id);
+    const result = querry.all(userId);
     res.json(result);
+}
+
+export async function removeTag(req:Request, res:Response, next:NextFunction, database:DatabaseSync){
+    const userId = req.session.userId!;
+    const tagId =  req.params.id;
+    if (tagId === undefined || Array.isArray(tagId)){
+        return res.sendStatus(400);
+    }
+
+    const querry = database.prepare("DELETE FROM tags WHERE id = ? AND user_id = ?");
+    const result = querry.run(tagId, userId);
+    return res.sendStatus(200)
 }
