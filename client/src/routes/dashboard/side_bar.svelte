@@ -26,8 +26,8 @@
 
 <div id="sidebar-container">
     <div class="sidebar-header">
-        <div class="brand-logo">TF</div>
-        <h2>TaskFlow</h2>
+        <div class="brand-logo">TL</div>
+        <h2>TaskList</h2>
     </div>
 
     <div id="bookmarks">
