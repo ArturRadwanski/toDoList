@@ -138,9 +138,9 @@
                 (selectedTags.length === 0 || task.tags.some(element => selectedTags.includes(element)))
                 && selectedPriorities.includes(task.priority) 
                 && (startDate === null || task.requiredBy >= Date.parse(startDate))
-                && (endDate === null || task.requiredBy <= Date.parse(endDate))
+                && (endDate === null || task.requiredBy <= Date.parse(endDate) + 86399999) //number added is equivalent of one full day, to make endDate inclusive
                 && (status === null || status === task.ended)
-                && (task.name.includes(lookFor) || lookFor.trim() === "")}
+                && (lookFor.trim() === "" || task.name.includes(lookFor))}
             {#if included}
                 <TaskCard {task}/>
             {/if}

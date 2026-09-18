@@ -1,0 +1,13 @@
+{
+  "name": "tasklist-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm --prefix client install && npm --prefix server install",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
+    "copy:client": "npx shx mkdir -p server/dist/client/build && npx shx cp -r client/build/* server/dist/client/build/",
+    "build": "npm run setup && npm run build:client && npm run build:server && npm run copy:client",
+    "start": "npm --prefix server start"
+  }
+}

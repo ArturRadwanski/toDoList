@@ -100,13 +100,12 @@
 <BackgroundImage image_source = {login_background} />
 <div class="container" >
 <div class="outer">
-    <h1>TaskFlow</h1>
+    <h1>TaskList</h1>
     <div class="inner">
         <h2>Welcome Back!</h2>
         <div class="login-form">
             <input type="text" placeholder="Nickname" name="nickname" id="nickname" bind:value={nickname}/>
             <input type="password" placeholder="Password" name="password" id="password" bind:value={password}/>
-            <p><b>Forgot Password?</b></p>
             <button disabled="{is_empty}" {onclick}>Log In</button>
         </div>
         <p>Don't have an account? <a href="/register"><b>Sign up</b></a></p>

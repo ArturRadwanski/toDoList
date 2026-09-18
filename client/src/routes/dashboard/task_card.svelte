@@ -90,6 +90,7 @@
         type="checkbox" 
         onclick={toggleTask}
         class="task-checkbox"
+        checked={task.ended}
     />
 
     <div class="task-info">

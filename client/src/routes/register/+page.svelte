@@ -14,7 +14,7 @@
 
     let passwordTip = $derived.by(() => {
         if(password.length < 8) {
-            return "Passoword should have length of at least 8 characters";
+            return "Passoword too short";
         }
         else if(password !== passwordRepeat) {
             return "Passwords do not match";

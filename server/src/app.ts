@@ -18,7 +18,7 @@ databaseInit(database);
 
 const app = express();
 app.use(express.json());
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = config.nodeEnviroment === 'production';
 
 app.use(cors({
     origin: isProd ? false : 'http://localhost:5173', 

@@ -31,7 +31,7 @@
     }
 
     function assertIsCompleteTask(task: Partial<Task>): asserts task is Omit<Task, 'id' | 'ended'> {
-        if (!activeTask.name || !activeTask.description || activeTask.priority === undefined || !activeTask.tags) {
+        if (!activeTask.name || activeTask.description === undefined || activeTask.priority === undefined || !activeTask.tags) {
             throw new Error("task incomplete");
         }
     }
@@ -51,7 +51,7 @@
                 sharedState.addTask({...activeTask, id: data.taskId, ended: false});
                 sharedState.closeModal();
             } catch {
-                alert("Something went wrong. Try refreshing the page and if the problem persists, contact administrator.");
+                alert("Something went wrong, but task was successfully added. Try refreshing the page and if the problem persists, contact administrator.");
             }
         } else {
             alert(`Server sent response: "${response.status} ${response.statusText}". Task wasn't added to your list`);

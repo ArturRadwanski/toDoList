@@ -12,7 +12,7 @@ interface Config {
 
 const config: Config = {
   port: Number(process.env.PORT) || 3000,
-  jwtSecretKey: process.env.NODE_ENV || 'development',
+  jwtSecretKey: process.env.SECRET || 'development',
   pepper: process.env.PEPPER || 'asdfk',
   emailSecretKey: process.env.EMAIL_SECRET || 'asfasf',
   nodeEnviroment: process.env.NODE_ENV || "development"
